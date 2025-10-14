@@ -1,0 +1,29 @@
+{
+  "dataset_name": "goodreads-books-100k",
+  "kaggle_url": "https://www.kaggle.com/datasets/mdhamani/goodreads-books-100k",
+  "filename": "GoodReads_100k_books.csv",
+  "size": "120.17 MB",
+  "download_instructions": [
+    "1. Visit: https://www.kaggle.com/datasets/mdhamani/goodreads-books-100k",
+    "2. Click 'Download' button (requires Kaggle account)",
+    "3. Extract the CSV file to data/raw/goodreads/",
+    "4. Rename file to 'books.csv' if needed",
+    "5. Run preprocessing script"
+  ],
+  "kaggle_api_command": "kaggle datasets download -d mdhamani/goodreads-books-100k -p data/raw/goodreads/ --unzip",
+  "expected_columns": [
+    "book_id",
+    "title",
+    "authors",
+    "description",
+    "genres",
+    "average_rating",
+    "num_pages",
+    "ratings_count",
+    "text_reviews_count",
+    "publication_date",
+    "publisher",
+    "isbn",
+    "isbn13"
+  ]
+}

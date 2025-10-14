@@ -1,0 +1,34 @@
+name: mlenv
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.12.5
+  - pip
+  
+  # Core ML framework
+  - pytorch
+  - pytorch-cuda=12.1  # For GPU support
+  
+  # Essential packages
+  - numpy
+  - pandas
+  - scikit-learn
+  - beautifulsoup4
+  - requests
+  - pyyaml
+  - tqdm
+  
+  # Visualization
+  - matplotlib
+  - seaborn
+  
+  # Optional: Jupyter for experimentation
+  - jupyter
+  - jupyterlab
+  
+  # Optional: Development tools
+  - black
+  - flake8
+  - pytest

@@ -1,0 +1,4 @@
+.DS_Store
+*.pyc
+data/raw/goodreads/GoodReads_100k_books.csv
+/data/processed

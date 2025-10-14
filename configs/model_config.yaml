@@ -1,0 +1,87 @@
+# Model Configuration
+model:
+  name: "BookSemanticEncoder"
+  architecture: "transformer"
+  
+  # Encoder settings
+  embedding_dim: 768
+  num_layers: 12
+  num_heads: 12
+  hidden_dim: 3072
+  max_sequence_length: 512
+  dropout: 0.1
+  
+  # Tag prediction head
+  num_tags: 256
+  tag_embedding_dim: 128
+  
+# Training Configuration
+training:
+  batch_size: 32
+  learning_rate: 0.00002
+  num_epochs: 50
+  warmup_steps: 1000
+  weight_decay: 0.01
+  gradient_clipping: 1.0
+  
+  # Loss weights
+  contrastive_loss_weight: 1.0
+  tag_prediction_loss_weight: 0.5
+  triplet_loss_weight: 0.3
+  
+  # Optimizer
+  optimizer: "AdamW"
+  scheduler: "cosine_with_warmup"
+  
+# Data Configuration
+data:
+  # Dataset paths
+  goodreads_path: "data/raw/goodreads/"
+  openlibrary_path: "data/raw/openlibrary/"
+  content_path: "data/raw/content/"
+  processed_path: "data/processed/"
+  
+  # Preprocessing settings
+  min_book_length: 100  # minimum pages
+  max_sequence_length: 512
+  vocab_size: 50000
+  min_word_frequency: 5
+  
+  # Data splits
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  
+# Inference Configuration
+inference:
+  similarity_threshold: 0.3
+  max_recommendations: 20
+  diversity_weight: 0.2
+  tag_weight: 0.3
+  semantic_weight: 0.7
+  
+# Evaluation Configuration
+evaluation:
+  metrics:
+    - "cosine_similarity"
+    - "tag_accuracy"
+    - "recommendation_diversity"
+    - "coverage"
+  
+  # Evaluation settings
+  k_values: [5, 10, 20]
+  similarity_threshold: 0.5
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  log_dir: "results/logs/"
+  tensorboard_dir: "results/tensorboard/"
+  save_frequency: 1000  # steps
+  
+# Hardware Configuration
+hardware:
+  device: "cpu"  # cuda, cpu, mps
+  num_workers: 4
+  pin_memory: true
+  mixed_precision: true
