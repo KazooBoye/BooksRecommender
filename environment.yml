@@ -9,7 +9,7 @@ dependencies:
   
   # Core ML framework
   - pytorch
-  - pytorch-cuda=12.1  # For GPU support
+  #- pytorch-cuda=12.1  # For GPU support
   
   # Essential packages
   - numpy

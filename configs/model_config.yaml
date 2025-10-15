@@ -17,7 +17,7 @@ model:
   
 # Training Configuration
 training:
-  batch_size: 32
+  batch_size: 8
   learning_rate: 0.00002
   num_epochs: 50
   warmup_steps: 1000
@@ -81,7 +81,7 @@ logging:
   
 # Hardware Configuration
 hardware:
-  device: "cpu"  # cuda, cpu, mps
+  device: "cuda"  # cuda, cpu, mps
   num_workers: 4
   pin_memory: true
   mixed_precision: true
