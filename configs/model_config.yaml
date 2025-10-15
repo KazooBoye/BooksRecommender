@@ -12,7 +12,7 @@ model:
   dropout: 0.1
   
   # Tag prediction head
-  num_tags: 256
+  num_tags: 1159
   tag_embedding_dim: 128
   
 # Training Configuration
