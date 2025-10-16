@@ -9,10 +9,15 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Optional
 import logging
+import argparse
 from dataclasses import dataclass
+import sys
 
-from ..models.model import BookRecommenderModel
-from ..utils.tokenizer import BookTokenizer
+# Add the project root to the Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+from src.models.model import BookRecommenderModel
+from src.utils.tokenizer import BookTokenizer
 
 logger = logging.getLogger(__name__)
 
