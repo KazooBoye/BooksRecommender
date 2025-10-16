@@ -68,16 +68,8 @@ class BookRecommendationEngine:
     
     def _load_model(self, model_path: str) -> BookRecommenderModel:
         """Load trained model."""
-        try:
-            # Try loading with weights_only=False for backward compatibility
-            checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
-        except Exception as e:
-            logger.warning(f"Failed to load with weights_only=False: {e}")
-            # Fallback to safe loading with allowlisted globals
-            import torch.serialization
-            import numpy
-            with torch.serialization.safe_globals([numpy.core.multiarray.scalar]):
-                checkpoint = torch.load(model_path, map_location=self.device, weights_only=True)
+        # Simple approach: just load with weights_only=False since we trust our own model files
+        checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
         
         # Create model with proper configuration
         model_config = checkpoint['config']['model']
