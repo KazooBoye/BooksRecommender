@@ -58,7 +58,13 @@ class BookRecommendationEngine:
         
         # Load book database
         self.book_database = self._load_book_database()
+        
+        # Load or compute book embeddings
         self.book_embeddings = self._load_book_embeddings()
+        if self.book_embeddings is None:
+            logger.info("Pre-computing book embeddings for fast inference...")
+            embeddings_path = os.path.join('models', 'book_embeddings.pt')
+            self.book_embeddings = self.compute_book_embeddings(embeddings_path)
         
         # Load tag vocabulary
         self.tag_vocab = self._load_tag_vocab()
@@ -120,9 +126,9 @@ class BookRecommendationEngine:
         embeddings_path = os.path.join('models', 'book_embeddings.pt')
         
         if os.path.exists(embeddings_path):
-            embeddings = torch.load(embeddings_path, map_location=self.device)
+            embeddings = torch.load(embeddings_path, map_location=self.device, weights_only=False)
             logger.info(f"Loaded pre-computed embeddings for {embeddings.shape[0]} books")
-            return embeddings
+            return embeddings.to(self.device)
         else:
             logger.info("No pre-computed embeddings found. Will compute on-the-fly.")
             return None
@@ -175,6 +181,30 @@ class BookRecommendationEngine:
     
     def compute_similarity_scores(self, query_embedding: torch.Tensor) -> np.ndarray:
         """Compute similarity scores between query and all books."""
+        if self.book_embeddings is None:
+            # Fallback to slow method if embeddings not available
+            return self._compute_similarity_scores_slow(query_embedding)
+        
+        # Fast vectorized computation using pre-computed embeddings
+        query_embedding = query_embedding.cpu().numpy()
+        book_embeddings = self.book_embeddings.cpu().numpy()
+        
+        # Normalize embeddings
+        query_norm = np.linalg.norm(query_embedding)
+        book_norms = np.linalg.norm(book_embeddings, axis=1)
+        
+        if query_norm > 0:
+            # Vectorized cosine similarity computation
+            similarities = np.dot(book_embeddings, query_embedding) / (book_norms * query_norm)
+            # Handle division by zero
+            similarities = np.where(book_norms > 0, similarities, 0.0)
+        else:
+            similarities = np.zeros(len(book_embeddings))
+        
+        return similarities
+    
+    def _compute_similarity_scores_slow(self, query_embedding: torch.Tensor) -> np.ndarray:
+        """Fallback method: compute similarity scores on-the-fly (slow)."""
         num_books = len(self.book_database)
         similarities = np.zeros(num_books)
         
@@ -349,15 +379,15 @@ class BookRecommendationEngine:
         
         return selected[:num_recommendations]
     
-    def compute_book_embeddings(self, save_path: str = None) -> torch.Tensor:
+    def compute_book_embeddings(self, save_path: Optional[str] = None) -> torch.Tensor:
         """Pre-compute embeddings for all books in database."""
         logger.info("Computing embeddings for all books...")
         
         num_books = len(self.book_database)
         embedding_dim = self.config['model']['embedding_dim']
-        embeddings = torch.zeros(num_books, embedding_dim)
+        embeddings = torch.zeros(num_books, embedding_dim, device=self.device)
         
-        batch_size = 32
+        batch_size = 64  # Increased batch size for faster processing
         for i in range(0, num_books, batch_size):
             batch_end = min(i + batch_size, num_books)
             batch_texts = []
@@ -389,20 +419,20 @@ class BookRecommendationEngine:
             # Compute embeddings
             with torch.no_grad():
                 batch_embeddings = self.model.encode_text(input_ids, attention_mask)
-                embeddings[i:batch_end] = batch_embeddings.cpu()
+                embeddings[i:batch_end] = batch_embeddings
             
-            if (i // batch_size + 1) % 10 == 0:
-                logger.info(f"Processed {batch_end}/{num_books} books")
+            if (i // batch_size + 1) % 5 == 0:  # More frequent progress updates
+                logger.info(f"Processed {batch_end}/{num_books} books ({100*batch_end/num_books:.1f}%)")
         
-        # Save embeddings
+        # Save embeddings (move to CPU for saving)
         if save_path is None:
             save_path = os.path.join('models', 'book_embeddings.pt')
         
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        torch.save(embeddings, save_path)
+        torch.save(embeddings.cpu(), save_path)
         logger.info(f"Saved embeddings to {save_path}")
         
-        return embeddings
+        return embeddings  # Return on original device
 
 
 def main():
